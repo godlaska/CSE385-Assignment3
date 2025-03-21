@@ -63,7 +63,9 @@ public class SimpleGUI {
             Statement statement = conn.createStatement();
             ResultSet resultSet = statement.executeQuery(query);
 
-            // Get database column names and add them to the table model
+            // Get database column names and add them to the table model. This
+            // isn't technically necessary, but it makes getting the column
+            // names much easier than hardcoding them
             ResultSetMetaData metaData = resultSet.getMetaData();
             int columnCount = metaData.getColumnCount();
             for (int i = 1; i <= columnCount; i++) {

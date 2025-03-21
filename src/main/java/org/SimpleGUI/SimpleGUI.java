@@ -1,7 +1,10 @@
 /**
- * Simple GUI Application to display data from a MySQL database using
- * HikariCP for connection pooling. ChatGPT assisted in writing the code for
- * connection pooling and loading Maven dependencies.
+ * @author Keigen Godlaski
+ * @date 3/21/2025
+ * @description Simple GUI Application to display data from a MySQL database
+ * using HikariCP for connection pooling. ChatGPT assisted in writing the
+ * code for connection pooling and loading Maven dependencies. Maven is used
+ * mostly to import the HikariCP library. The GUI is created using Java Swing.
  */
 
 package org.SimpleGUI;
@@ -80,6 +83,8 @@ public class SimpleGUI {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
+            // Close the datasource connection, multiple attempts are made
+            // to ensure it closes properly
             try {
                 if (dataSource != null) {
                     dataSource.close();

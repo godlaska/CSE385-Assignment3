@@ -1,4 +1,77 @@
+/**
+ * Simple GUI Application to display data from a MySQL database using
+ * HikariCP for connection pooling. ChatGPT assisted in writing the code for
+ * connection pooling and loading Maven dependencies.
+ */
+
 package org.SimpleGUI;
 
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.sql.*;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
 public class SimpleGUI {
+    private static HikariDataSource dataSource;
+
+    public static void main(String[] args) {
+        // Configure HikariCP Connection Pool
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl("jdbc:mysql://localhost:3306/world");
+        config.setUsername("root");
+        config.setPassword("pass");
+        config.setMaximumPoolSize(3);
+        dataSource = new HikariDataSource(config);
+
+        // The invokeLater method is used to ensure that the GUI creation
+        // and updates are done on the Event Dispatch Thread (Swing's handling
+        // of GUI updates, user input, and component threads). Documentation
+        // found at...
+        // https://docs.oracle.com/javase/8/docs/api/javax/swing/SwingUtilities.html#invokeLater-java.lang.Runnable-
+        SwingUtilities.invokeLater(SimpleGUI::createAndShowGUI);
+    }
+
+    private static void createAndShowGUI() {
+        // JFrame documentation found at...
+        // https://www.geeksforgeeks.org/java-jframe/
+        JFrame frame = new JFrame("City Database");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        DefaultTableModel model = new DefaultTableModel();
+        JTable table = new JTable(model);
+        JScrollPane scrollPane = new JScrollPane(table);
+        frame.add(scrollPane);
+
+        loadData(model);
+
+        frame.setSize(800, 600);
+        frame.setVisible(true);
+    }
+
+    private static void loadData(DefaultTableModel model) {
+        String query = "SELECT * FROM city";
+        try (Connection conn = dataSource.getConnection();
+             Statement statement = conn.createStatement();
+             ResultSet resultSet = statement.executeQuery(query)) {
+
+            // Get database column names and add them to the table model
+            ResultSetMetaData metaData = resultSet.getMetaData();
+            int columnCount = metaData.getColumnCount();
+            for (int i = 1; i <= columnCount; i++) {
+                model.addColumn(metaData.getColumnName(i));
+            }
+
+            // Add data from the database to the table model
+            while (resultSet.next()) {
+                Object[] row = new Object[columnCount];
+                for (int i = 0; i < columnCount; i++) {
+                    row[i] = resultSet.getObject(i + 1);
+                }
+                model.addRow(row);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

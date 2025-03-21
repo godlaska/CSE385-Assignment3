@@ -22,6 +22,7 @@ public class SimpleGUI {
         config.setUsername("root");
         config.setPassword("pass");
         config.setMaximumPoolSize(3);
+        // Load data
         dataSource = new HikariDataSource(config);
 
         // The invokeLater method is used to ensure that the GUI creation
@@ -38,11 +39,14 @@ public class SimpleGUI {
         JFrame frame = new JFrame("City Database");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+        // Documentation found at...
+        // https://docs.oracle.com/javase/8/docs/api/javax/swing/table/DefaultTableModel.html
         DefaultTableModel model = new DefaultTableModel();
         JTable table = new JTable(model);
         JScrollPane scrollPane = new JScrollPane(table);
         frame.add(scrollPane);
 
+        // Add data into the table model from the world.city database
         loadData(model);
 
         frame.setSize(800, 600);
@@ -50,10 +54,11 @@ public class SimpleGUI {
     }
 
     private static void loadData(DefaultTableModel model) {
-        String query = "SELECT * FROM city";
-        try (Connection conn = dataSource.getConnection();
-             Statement statement = conn.createStatement();
-             ResultSet resultSet = statement.executeQuery(query)) {
+        String query = "SELECT * FROM world.city";
+        try {
+            Connection conn = dataSource.getConnection();
+            Statement statement = conn.createStatement();
+            ResultSet resultSet = statement.executeQuery(query);
 
             // Get database column names and add them to the table model
             ResultSetMetaData metaData = resultSet.getMetaData();
@@ -64,14 +69,30 @@ public class SimpleGUI {
 
             // Add data from the database to the table model
             while (resultSet.next()) {
+                // Object array that holds row data
                 Object[] row = new Object[columnCount];
                 for (int i = 0; i < columnCount; i++) {
+                    // Populate row data
                     row[i] = resultSet.getObject(i + 1);
                 }
                 model.addRow(row);
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                if (dataSource != null) {
+                    dataSource.close();
+                }
+                if (dataSource != null) {
+                    dataSource.close();
+                }
+                if (dataSource != null) {
+                    dataSource.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 }
